@@ -1,0 +1,169 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const Checkout = ({ cart, removeFromCart, cryptoRates }) => {
+  const navigate = useNavigate();
+  const [paymentMethod, setPaymentMethod] = useState('bitcoin');
+  const [email, setEmail] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderId, setOrderId] = useState(null);
+  
+  const calculateTotal = () => {
+    return cart.reduce((total, item) => total + item.value, 0);
+  };
+  
+  const calculateCryptoTotal = () => {
+    const totalUSD = calculateTotal();
+    return (totalUSD / cryptoRates[paymentMethod]).toFixed(6);
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    
+    try {
+      // In production, this would call our backend API
+      // const response = await fetch('/api/create-order', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     items: cart,
+      //     paymentMethod,
+      //     email
+      //   })
+      // });
+      
+      // Mock response for demonstration
+      setTimeout(() => {
+        const mockOrderId = `ORD-${Date.now()}`;
+        setOrderId(mockOrderId);
+        setIsProcessing(false);
+        navigate(`/order/${mockOrderId}`);
+      }, 1500);
+    } catch (error) {
+      console.error('Error creating order:', error);
+      setIsProcessing(false);
+    }
+  };
+  
+  if (cart.length === 0) {
+    return (
+      <div className="checkout empty">
+        <h2>Your cart is empty</h2>
+        <p>Browse our gift cards and add some to your cart!</p>
+        <button onClick={() => navigate('/')}>Browse Gift Cards</button>
+      </div>
+    );
+  }
+  
+  if (orderId) {
+    return (
+      <div className="checkout success">
+        <h2>Order Placed Successfully!</h2>
+        <p>Your order ID: {orderId}</p>
+        <button onClick={() => navigate(`/order/${orderId}`)}>
+          View Order Status
+        </button>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="checkout">
+      <h2>Checkout</h2>
+      
+      <div className="cart-items">
+        {cart.map(item => (
+          <div key={item.id} className="cart-item">
+            <div className="item-info">
+              <div className="item-brand">{item.brand}</div>
+              <div className="item-value">${item.value}</div>
+            </div>
+            <button 
+              className="remove-btn"
+              onClick={() => removeFromCart(item.id)}
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+      </div>
+      
+      <div className="order-summary">
+        <div className="summary-row">
+          <span>Subtotal:</span>
+          <span>${calculateTotal()}</span>
+        </div>
+        <div className="summary-row">
+          <span>Service Fee:</span>
+          <span>$0.00</span>
+        </div>
+        <div className="summary-row total">
+          <span>Total:</span>
+          <span>${calculateTotal()}</span>
+        </div>
+      </div>
+      
+      <form className="payment-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Email Address</label>
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email for delivery"
+          />
+        </div>
+        
+        <div className="form-group">
+          <label>Payment Method</label>
+          <div className="payment-methods">
+            <div 
+              className={`method ${paymentMethod === 'bitcoin' ? 'selected' : ''}`}
+              onClick={() => setPaymentMethod('bitcoin')}
+            >
+              <img src="/bitcoin-logo.png" alt="Bitcoin" />
+              <span>Bitcoin</span>
+            </div>
+            <div 
+              className={`method ${paymentMethod === 'ethereum' ? 'selected' : ''}`}
+              onClick={() => setPaymentMethod('ethereum')}
+            >
+              <img src="/ethereum-logo.png" alt="Ethereum" />
+              <span>Ethereum</span>
+            </div>
+            <div 
+              className={`method ${paymentMethod === 'litecoin' ? 'selected' : ''}`}
+              onClick={() => setPaymentMethod('litecoin')}
+            >
+              <img src="/litecoin-logo.png" alt="Litecoin" />
+              <span>Litecoin</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="crypto-payment-info">
+          <h3>Payment Instructions</h3>
+          <p>Send <strong>{calculateCryptoTotal()} {paymentMethod.toUpperCase()}</strong> to:</p>
+          <div className="wallet-address">
+            1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+          </div>
+          <p className="note">
+            After 2-6 blockchain confirmations, your gift card will be delivered to your email.
+          </p>
+        </div>
+        
+        <button 
+          type="submit" 
+          className="submit-btn"
+          disabled={isProcessing}
+        >
+          {isProcessing ? 'Processing...' : 'Complete Purchase'}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default Checkout;

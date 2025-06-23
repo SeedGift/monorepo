@@ -1,0 +1,109 @@
+import React, { useState, useEffect } from 'react';
+import GiftCard from './GiftCard';
+
+const GiftCardMarketplace = ({ addToCart, cryptoRates }) => {
+  const [giftCards, setGiftCards] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const fetchGiftCards = async () => {
+      try {
+        // In production, this would call our backend API
+        // const response = await fetch('/api/gift-cards');
+        
+        // Mock data for demonstration
+        setTimeout(() => {
+          const mockGiftCards = [
+            { id: 1, brand: 'Amazon', value: 50, image: 'amazon', cryptoAmount: {} },
+            { id: 2, brand: 'Steam', value: 100, image: 'steam', cryptoAmount: {} },
+            { id: 3, brand: 'Apple', value: 150, image: 'apple', cryptoAmount: {} },
+            { id: 4, brand: 'Xbox', value: 60, image: 'xbox', cryptoAmount: {} },
+            { id: 5, brand: 'PlayStation', value: 75, image: 'playstation', cryptoAmount: {} },
+            { id: 6, brand: 'Google Play', value: 25, image: 'google-play', cryptoAmount: {} },
+            { id: 7, brand: 'Spotify', value: 120, image: 'spotify', cryptoAmount: {} },
+            { id: 8, brand: 'Netflix', value: 90, image: 'netflix', cryptoAmount: {} },
+          ];
+          
+          // Calculate crypto amounts
+          const cardsWithCrypto = mockGiftCards.map(card => {
+            const cryptoAmounts = {};
+            for (const [crypto, rate] of Object.entries(cryptoRates)) {
+              cryptoAmounts[crypto] = (card.value / rate).toFixed(6);
+            }
+            return { ...card, cryptoAmount: cryptoAmounts };
+          });
+          
+          setGiftCards(cardsWithCrypto);
+          setLoading(false);
+        }, 800);
+      } catch (error) {
+        console.error('Error fetching gift cards:', error);
+        setLoading(false);
+      }
+    };
+    
+    fetchGiftCards();
+  }, [cryptoRates]);
+
+  const filteredCards = filter === 'all' 
+    ? giftCards 
+    : giftCards.filter(card => card.brand.toLowerCase().includes(filter.toLowerCase()));
+
+  if (loading) {
+    return (
+      <div className="marketplace loading">
+        <div className="spinner"></div>
+        <p>Loading gift cards...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="marketplace">
+      <div className="marketplace-header">
+        <h1>Buy Gift Cards with Crypto</h1>
+        <p>Instantly purchase digital gift cards using cryptocurrency</p>
+        
+        <div className="filters">
+          <button 
+            className={filter === 'all' ? 'active' : ''}
+            onClick={() => setFilter('all')}
+          >
+            All Cards
+          </button>
+          <button 
+            className={filter === 'gaming' ? 'active' : ''}
+            onClick={() => setFilter('gaming')}
+          >
+            Gaming
+          </button>
+          <button 
+            className={filter === 'entertainment' ? 'active' : ''}
+            onClick={() => setFilter('entertainment')}
+          >
+            Entertainment
+          </button>
+          <button 
+            className={filter === 'retail' ? 'active' : ''}
+            onClick={() => setFilter('retail')}
+          >
+            Retail
+          </button>
+        </div>
+      </div>
+      
+      <div className="gift-cards-grid">
+        {filteredCards.map(card => (
+          <GiftCard 
+            key={card.id} 
+            card={card} 
+            addToCart={addToCart} 
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default GiftCardMarketplace;
