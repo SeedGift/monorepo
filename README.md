@@ -1,6 +1,6 @@
 # Seed Gift Card Marketplace - Readme
 
-A full-stack cryptocurrency gift card marketplace that allows users to purchase digital gift cards using SAND( Sandbox Token ), Bitcoin, Ethereum, and other cryptocurrencies. This project integrates with CoinGate for payment processing and Tango Card for gift card fulfillment.
+A full-stack cryptocurrency gift card marketplace that allows users to purchase digital gift cards using GTC, USDC, ETH, OP, POL, OP (  EVM Chains Only ). This project integrates with CoinGate for payment processing and Tango Card for gift card fulfillment.
 
 ## Features
 
